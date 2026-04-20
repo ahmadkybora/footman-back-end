@@ -15,7 +15,7 @@ import { UsersService } from './users.service';
 import { IUser } from './entities/user.entity';
 import { RegisterUserDto } from './dto/user.dto';
 import { SearchUserDto } from './dto/search-user.dto';
-import { AuthGuard } from '../../common/guards/auth/jwt-auth.guard';
+import { AuthGuard } from 'src/common/guards/auth/jwt-auth.guard';
 
 @Controller('admin/users')
 @UseGuards(AuthGuard)

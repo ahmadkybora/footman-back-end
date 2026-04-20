@@ -10,21 +10,27 @@ import {
   HttpStatus,
   BadRequestException,
   NotFoundException,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { IProduct } from './entities/product.entity';
 import { SearchProductDto } from './dto/search-product-dto';
 import { CreateProductDto } from './dto/create-product-dto';
 import { UpdateProductDto } from './dto/update-product-dto';
+import { AuthGuard } from 'src/common/guards/auth/jwt-auth.guard';
 
 @Controller('admin/products')
+// @UseGuards(AuthGuard)
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get()
-  @HttpCode(HttpStatus.OK)
-  async findAll()/*: Promise<IProduct[]>*/ {
-    return this.productsService.filterCategory();
+  // @HttpCode(HttpStatus.OK)
+  async findAll(@Query() query: string)/*: Promise<IProduct[]>*/ {
+    console.log('query', query);
+    return this.productsService.findAll(query);
+    // return this.productsService.filterCategory();
   }
 
   @Get(':id')

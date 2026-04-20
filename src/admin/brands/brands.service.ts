@@ -13,10 +13,35 @@ export class BrandsService {
   constructor(
     @InjectModel('Brands')
     private readonly brandRepository: Model<IBrand>,
+    @InjectModel('ProductsCategory')
+    private readonly productsCategoryRepository: Model<IBrand>,
+    @InjectModel('Products')
+    private readonly productsRepository: Model<IBrand>,
   ) {}
 
-  async findAll(): Promise<IBrand[]> {
-    return this.brandRepository.find();
+  async findAll(query: any): Promise<IBrand[]> {
+    // console.log('query', query)
+    // return this.brandRepository.find();
+    const { cat } = query;
+    // console.log(cat)
+    if (!cat) {
+      return this.brandRepository.find();
+    }
+    // const brandId = await this.brandRepository
+    //   .findOne({ title: cat })
+    //   .select('_id');
+    console.log('cat', cat);
+    return this.productsCategoryRepository.find({ brandId: cat });
+
+    // const productsCategoryId = productsCategories.map((cat) => cat._id);
+    // console.log('s', productsCategoryId);
+    // console.log('productsCategoryId', this.productsRepository.find({
+    //   productsCategoryId: { $in: productsCategoryId },
+    // }))
+    // return await this.productsRepository.find();
+    // return await this.productsRepository.find({
+    //   productsCategoryId: { $in: productsCategoryId },
+    // });
   }
   async findOne(_id: string): Promise<IBrand | null> {
     const brand = await this.brandRepository.findOne({ _id });

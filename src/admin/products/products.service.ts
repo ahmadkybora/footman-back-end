@@ -15,14 +15,25 @@ export class ProductsService {
   constructor(
     @InjectModel('Products')
     private productsRepository: Model<IProduct>,
-    // @InjectModel('ProductsCategory')
-    // private productsCategoryRepository: Model<IProductsCategory>,
+    @InjectModel('ProductsCategory')
+    private productsCategoryRepository: Model<IProductsCategory>,
     @InjectModel('Brands')
     private brandsRepository: Model<IBrand>,
   ) {}
 
-  async findAll(): Promise<IProduct[]> {
-    return this.productsRepository.find();
+  async findAll(query: string)/*: Promise<IProduct[]>*/ {
+    return await this.filter(query);
+    // return await this.getBrandWithAllCategory(query);
+    console.log('query', query);
+    // // return await this.filterKeshoyi();
+    // if (query) {
+    //   return await this.filter(query);
+    // } else {
+      return this.productsRepository
+        .find()
+        .populate('brandId', 'title')
+        .populate('productsCategoryId', 'title');
+    // }
   }
 
   async findOne(_id: string): Promise<IProduct | null> {
@@ -62,24 +73,107 @@ export class ProductsService {
     ]);
   }
 
-  async filter(): Promise<IProduct[]> {
-    return this.productsRepository.aggregate([{ $sort: { price: 1 } }]);
+  async filter(query: any) {
+    const { sort, minPrice, maxPrice, brand, category } = query;
+
+    if (brand) {
+      const brandId = await this.brandsRepository
+        .findOne({ title: brand })
+        .select('_id');
+      const productsCategoryId = await this.productsCategoryRepository
+        .find({ brandId })
+        .select('_id');
+
+      return await this.productsRepository.find({
+        productsCategoryId: { $in: productsCategoryId },
+      });
+    } else if (category) {
+      const productsCategoryId = await this.productsCategoryRepository
+        .findOne({ title: category })
+        .select('_id');
+      return await this.productsRepository.find({
+        productsCategoryId: { $in: productsCategoryId },
+      });
+    } else if (minPrice && maxPrice) {
+      return this.productsRepository.aggregate([
+        { $match: { price: { $gte: Number(minPrice), $lte: Number(maxPrice) } } },
+        { $sort: { price: 1 } },
+      ]);
+    } else if (sort === 'geran') {
+      return this.productsRepository.aggregate([{ $sort: { price: 1 } }]);
+    } else if (sort === 'arzan') {
+      return this.productsRepository.aggregate([{ $sort: { price: -1 } }]);
+    }
+  }
+
+  async filter1(query: any)/*: Promise<IProduct[]>*/ {
+    const { sort } = query;
+    // console.log("sort");
+    // console.log('sort', JSON.stringify(sort));
+    if (sort === 'geran') {
+      return this.productsRepository.aggregate([{ $sort: { price: 1 } }]);
+    } else if (sort === 'arzan') {
+      return this.productsRepository.aggregate([{ $sort: { price: -1 } }]);
+    }
   }
 
   async filterKeshoyi(): Promise<IProduct[]> {
-    const minPrice = 50;
-    const maxPrice = 200;
+    const minPrice = 100;
+    const maxPrice = 400;
     return this.productsRepository.aggregate([
       { $match: { price: { $gte: minPrice, $lte: maxPrice } } },
       { $sort: { price: 1 } },
     ]);
   }
 
+  async filterBrand() {
+    const title = 'sx';
+    const brandId = await this.brandsRepository
+      .findOne({ title })
+      .select('_id');
+    // console.log('brandId', brandId);
+    const productsCategoryId = await this.productsCategoryRepository
+      .find({ brandId })
+      .select('_id');
+    // console.log('productsCategoryId', productsCategoryId);
+    return await this.productsRepository.find({
+      productsCategoryId: { $in: productsCategoryId },
+    });
+  }
+
   async filterCategory() {
-    const brandId = await this.brandsRepository.find({ title: 'sx' }).select('_id');
-    console.log("productsCategoryId", brandId)
+    const title = 'sx';
+    const productsCategoryId = await this.productsCategoryRepository
+      .findOne({ title })
+      .select('_id');
+    // console.log('brandId', brandId);
+    // const productsCategoryId = await this.productsCategoryRepository
+    //   .find({ brandId })
+    //   .select('_id');
+    // console.log('productsCategoryId', productsCategoryId);
+    return await this.productsRepository.find({
+      productsCategoryId: { $in: productsCategoryId },
+    });
+    // console.log('products', products);
     // return this.productsRepository.find()
     //   .populate({ path: 'productId', select: 'price title _id' })
     //   .populate({ path: 'userId', select: 'userName _id' });
+  }
+
+  async getBrandWithAllCategory(query: any) {
+    const { cat } = query;
+    // console.log(cat)
+    if (!cat) {
+      return this.brandsRepository.find();
+    }
+    const brandId = await this.brandsRepository
+      .findOne({ title: cat })
+      .select('_id');
+    const productsCategoryId = await this.productsCategoryRepository
+      .find({ brandId })
+      .select('_id');
+    return await this.productsRepository.find({
+      productsCategoryId: { $in: productsCategoryId },
+    });
   }
 }

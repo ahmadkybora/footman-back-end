@@ -4,6 +4,9 @@ export class CreateProductDto {
   @IsString({ message: 'title' })
   title: string;
 
+  @IsString({ message: 'brandId' })
+  brandId: string;
+
   @IsString({ message: 'productsCategoryId' })
   productsCategoryId: string;
 

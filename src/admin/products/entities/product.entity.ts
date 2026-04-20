@@ -5,6 +5,7 @@ export interface IProduct extends Document {
   title: string;
   qty: number;
   price: string;
+  brandId: Schema.Types.ObjectId;
   productsCategoryId: Schema.Types.ObjectId;
   // setting: {
   //   rate: number;
@@ -21,6 +22,12 @@ export const ProductSchema: Schema<IProduct> = new Schema(
     price: {
       type: String,
       required: true,
+    },
+    brandId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Brand',
+      required: true,
+      index: true,
     },
     productsCategoryId: {
       type: Schema.Types.ObjectId,
