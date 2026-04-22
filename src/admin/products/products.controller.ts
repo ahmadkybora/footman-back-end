@@ -49,6 +49,7 @@ export class ProductsController {
     try {
       return await this.productsService.create(createProductDto);
     } catch (error) {
+      console.log('error', await error)
       if (error?.code === 11000) {
         throw new BadRequestException(error);
       }

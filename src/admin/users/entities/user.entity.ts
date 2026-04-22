@@ -7,12 +7,20 @@ export interface IUser extends Document {
   userName: string;
   email: string;
   password: string;
+  favorites: {
+    productId: Schema.Types.ObjectId;
+  };
 }
 
 export interface IToken extends Document {
   // _id: string;
   token: string;
   // blacklistedAt: Date;
+}
+
+export interface IUserFavorite extends Document {
+  productId: Schema.Types.ObjectId;
+  userId: Schema.Types.ObjectId;
 }
 
 export const UserSchema: Schema<IUser> = new Schema(
@@ -54,6 +62,26 @@ export const TokenSchema: Schema<IToken> = new Schema(
     //   type: Date,
     //   default: Date.now,
     // },
+  },
+  {
+    timestamps: true,
+  },
+);
+
+export const UserFavoriteSchema: Schema<IUserFavorite> = new Schema(
+  {
+    productId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Product',
+      required: true,
+      index: true,
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      index: true,
+    },
   },
   {
     timestamps: true,

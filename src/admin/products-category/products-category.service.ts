@@ -15,8 +15,12 @@ export class ProductsCategoryService {
     private productsCategoryRepository: Model<IProductsCategory>,
   ) {}
 
-  async findAll(): Promise<IProductsCategory[]> {
-    return this.productsCategoryRepository.find();
+  async findAll(query: any): Promise<IProductsCategory[]> {
+    const { brandId } = query;
+    console.log('brandId', brandId)
+    if (!brandId)
+      return this.productsCategoryRepository.find();
+    return this.productsCategoryRepository.find({ brandId });
   }
 
   async findOne(_id: string): Promise<IProductsCategory | null> {

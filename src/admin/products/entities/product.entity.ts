@@ -4,13 +4,12 @@ export interface IProduct extends Document {
   // _id: string;
   title: string;
   qty: number;
-  price: string;
+  price: number;
   brandId: Schema.Types.ObjectId;
   productsCategoryId: Schema.Types.ObjectId;
-  // setting: {
-  //   rate: number;
-  //   porforoshtarin: number;
-  // }
+  attribute: {
+    bestSell: number;
+  };
 }
 
 export const ProductSchema: Schema<IProduct> = new Schema(
@@ -20,7 +19,7 @@ export const ProductSchema: Schema<IProduct> = new Schema(
       required: true,
     },
     price: {
-      type: String,
+      type: Number,
       required: true,
     },
     brandId: {
@@ -38,6 +37,12 @@ export const ProductSchema: Schema<IProduct> = new Schema(
     qty: {
       type: Number,
       required: true,
+    },
+    attribute: {
+      bestSell: {
+        type: Number,
+        default: 0,
+      },
     },
   },
   {

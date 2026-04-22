@@ -10,7 +10,6 @@ import {
   HttpStatus,
   BadRequestException,
   NotFoundException,
-  Query,
 } from '@nestjs/common';
 import { BrandsService } from './brands.service';
 import { IBrand } from './entities/brand.entity';
@@ -25,9 +24,9 @@ export class BrandsController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  async findAll(/*@userCurrent() user: any*/@Query() query: any): Promise<IBrand[]> {
-    // console.log("user", user)
-    return this.brandsService.findAll(query);
+  async findAll(@userCurrent() user: any): Promise<IBrand[]> {
+    console.log("user", user)
+    return this.brandsService.findAll();
   }
 
   @Get(':id')

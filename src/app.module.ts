@@ -27,6 +27,7 @@ import { ArticlesCommentModule } from './admin/articles-comment/articles-comment
 import { SettingModule } from './admin/setting/setting.module';
 import { SiteMakerModule } from './admin/site-maker/site-maker.module';
 import { AclModule } from './admin/acl/acl.module';
+import { ProfileModule } from './profile/profile/profile.module';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { AclModule } from './admin/acl/acl.module';
     SettingModule,
     SiteMakerModule,
     AclModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtService, ConfigService],

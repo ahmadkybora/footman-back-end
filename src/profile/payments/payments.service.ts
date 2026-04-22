@@ -35,15 +35,52 @@ export class PaymentsService {
       if (!user) {
         throw new NotFoundException('کاربر یافت نشد');
       }
-      const carts = await this.cartsRepository.find({ userId }).exec();
+      const carts = await this.cartsRepository.find({ userId });
       let totalAmount: number = 0;
       const productsData: any = [];
       for (const cart of carts) {
-        const products = await this.productsRepository.find({ _id: { $in: cart.productId }}).exec();
-
+        const products = await this.productsRepository
+          .find({ _id: { $in: cart.productId } })
+          .lean();
         for (const product of products) {
           productsData.push({ productId: product._id, price: product.price });
           totalAmount += Number(product.price);
+          product.attribute.bestSell = 1;
+          console.log('product', product);
+          const payload = {
+            title: product.title,
+            price: product.title,
+            brandId: product.brandId,
+            productsCategoryId: product.productsCategoryId,
+            qty: product.qty,
+            attribute: product.attribute.bestSell,
+          };
+          // const doc = await this.productsRepository
+          //   .findOne({ _id: product._id })
+          //   .lean();
+          // console.log('doc', doc);
+          // if (doc) {
+          //   // if (!doc.attribute) doc.attribute = {};
+          //   doc.attribute.bestSell = (doc.attribute.bestSell || 0) + 1;
+          //   const s = await doc.save();
+          //   console.log('Updated:', s.attribute.bestSell);
+          // }
+
+          // const currentBestSell = product.attribute?.bestSell || 0;
+          // const newBestSell = currentBestSell + 1;
+
+          const s = await this.productsRepository.findOneAndUpdate(
+            { _id: product._id },
+            { $set: payload },
+            // {
+            //   attribute: {
+            //     ...product.attribute,
+            //     bestSell: newBestSell,
+            //   },
+            // },
+            { new: true },
+          );
+          console.log('s', s);
         }
       }
       const payment = new this.paymentsRepository({
@@ -55,7 +92,9 @@ export class PaymentsService {
       await payment.save();
 
       for (const cart of carts) {
-        await this.cartsRepository.findOneAndDelete({ userId: cart.userId }).exec();
+        await this.cartsRepository
+          .findOneAndDelete({ userId: cart.userId })
+          .exec();
       }
 
       return payment;

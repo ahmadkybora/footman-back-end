@@ -10,9 +10,11 @@ import { ProductsCategorySchema } from '../products-category/entities/products-c
 @Module({
   // imports: [TypeOrmModule.forFeature([Product])],
   imports: [
-    MongooseModule.forFeature([{ name: 'Products', schema: ProductSchema }]),
-    MongooseModule.forFeature([{ name: 'Brands', schema: BrandSchema }]),
-    MongooseModule.forFeature([{ name: 'ProductsCategory', schema: ProductsCategorySchema }]),
+    MongooseModule.forFeature([{ name: 'Product', schema: ProductSchema }]),
+    MongooseModule.forFeature([{ name: 'Brand', schema: BrandSchema }]),
+    MongooseModule.forFeature([
+      { name: 'ProductsCategory', schema: ProductsCategorySchema },
+    ]),
   ],
   controllers: [ProductsController],
   providers: [ProductsService],

@@ -13,18 +13,18 @@ import { IBrand } from '../brands/entities/brand.entity';
 @Injectable()
 export class ProductsService {
   constructor(
-    @InjectModel('Products')
-    private productsRepository: Model<IProduct>,
+    @InjectModel('Product')
+    private readonly productsRepository: Model<IProduct>,
     @InjectModel('ProductsCategory')
-    private productsCategoryRepository: Model<IProductsCategory>,
-    @InjectModel('Brands')
-    private brandsRepository: Model<IBrand>,
+    private readonly productsCategoryRepository: Model<IProductsCategory>,
+    @InjectModel('Brand')
+    private readonly brandsRepository: Model<IBrand>,
   ) {}
 
   async findAll(query: string)/*: Promise<IProduct[]>*/ {
-    return await this.filter(query);
+    // return await this.filter(query);
     // return await this.getBrandWithAllCategory(query);
-    console.log('query', query);
+    // console.log('query', query);
     // // return await this.filterKeshoyi();
     // if (query) {
     //   return await this.filter(query);
@@ -41,6 +41,7 @@ export class ProductsService {
   }
 
   async create(createProductDto: CreateProductDto): Promise<IProduct> {
+    console.log('createProductDto', createProductDto);
     return this.productsRepository.create(createProductDto);
   }
 
@@ -74,26 +75,46 @@ export class ProductsService {
   }
 
   async filter(query: any) {
+    let { brandId, categoryId, minPrice, maxPrice, sort } = query;
+    if (brandId) {
+      brandId = brandId.split(',');
+    }
+    if (categoryId) {
+      categoryId = categoryId.split(',');
+    }
+    const match: any = {};
+    if (brandId && brandId.length > 0) match.brandId = { $in: brandId };
+    if (categoryId && categoryId.length > 0) match.categoryId = { $in: categoryId };
+    if (minPrice || maxPrice) {
+      match.price = {};
+      if (minPrice) match.price.$gte = Number(minPrice);
+      if (maxPrice) match.price.$lte = Number(maxPrice);
+    }
+
+    let sortStage: any = {};
+    if (sort === 'price_asc') sortStage.price = 1;
+    else if (sort === 'price_desc') sortStage.price = -1;
+    else if (sort === 'fav_asc') sortStage.fav = 1;
+    else if (sort === 'pay_asc') sortStage.pay = 1;
+
+    const pipeline: any[] = [{ $match: match }];
+
+    if (Object.keys(sortStage).length > 0) {
+      pipeline.push({ $sort: sortStage });
+    }
+    const s = await this.productsRepository.aggregate(pipeline);
+    // console.log('pipeline', pipeline);
+    // console.log('match', match);
+    // console.log('s', s);
+    return this.productsRepository.aggregate(pipeline);
+  }
+
+  async filter12(query: any) {
     const { sort, minPrice, maxPrice, brand, category } = query;
-
     if (brand) {
-      const brandId = await this.brandsRepository
-        .findOne({ title: brand })
-        .select('_id');
-      const productsCategoryId = await this.productsCategoryRepository
-        .find({ brandId })
-        .select('_id');
-
-      return await this.productsRepository.find({
-        productsCategoryId: { $in: productsCategoryId },
-      });
+      return await this.productsRepository.find({ brandId: brand });
     } else if (category) {
-      const productsCategoryId = await this.productsCategoryRepository
-        .findOne({ title: category })
-        .select('_id');
-      return await this.productsRepository.find({
-        productsCategoryId: { $in: productsCategoryId },
-      });
+      return await this.productsRepository.find({ productsCategoryId: category });
     } else if (minPrice && maxPrice) {
       return this.productsRepository.aggregate([
         { $match: { price: { $gte: Number(minPrice), $lte: Number(maxPrice) } } },
@@ -106,6 +127,18 @@ export class ProductsService {
     }
   }
 
+  // const brandId = await this.brandsRepository
+  //   .findOne({ title: brand })
+  //   .select('_id');
+  // const productsCategoryId = await this.productsCategoryRepository
+  //   .find({ brandId })
+  //   .select('_id');
+  // const productsCategoryId = await this.productsCategoryRepository
+  //   .findOne({ title: category })
+  //   .select('_id');
+  // return await this.productsRepository.find({
+  //   productsCategoryId: { $in: productsCategoryId },
+  // });
   async filter1(query: any)/*: Promise<IProduct[]>*/ {
     const { sort } = query;
     // console.log("sort");

@@ -19,19 +19,19 @@ export class BrandsService {
     private readonly productsRepository: Model<IBrand>,
   ) {}
 
-  async findAll(query: any): Promise<IBrand[]> {
+  async findAll(): Promise<IBrand[]> {
     // console.log('query', query)
     // return this.brandRepository.find();
-    const { cat } = query;
+    // const { cat } = query;
     // console.log(cat)
-    if (!cat) {
-      return this.brandRepository.find();
-    }
+    // if (!cat) {
+    return this.brandRepository.find();
+    // }
     // const brandId = await this.brandRepository
     //   .findOne({ title: cat })
     //   .select('_id');
-    console.log('cat', cat);
-    return this.productsCategoryRepository.find({ brandId: cat });
+    // console.log('cat', cat);
+    // return this.productsCategoryRepository.find({ brandId: cat });
 
     // const productsCategoryId = productsCategories.map((cat) => cat._id);
     // console.log('s', productsCategoryId);

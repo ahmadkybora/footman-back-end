@@ -10,6 +10,7 @@ import {
   HttpStatus,
   BadRequestException,
   NotFoundException,
+  Query,
 } from '@nestjs/common';
 import { ProductsCategoryService } from './products-category.service';
 import { CreateProductsCategoryDto } from './dto/create-products-category.dto';
@@ -19,13 +20,14 @@ import { IProductsCategory } from './entities/products-category.entity';
 
 @Controller('admin/products-category')
 export class ProductCategoriesController {
-  constructor(private readonly productsCategoryService: ProductsCategoryService) {}
+  constructor(
+    private readonly productsCategoryService: ProductsCategoryService,
+  ) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  async findAll(): Promise<IProductsCategory[]> {
-    console.log(1, await this.productsCategoryService.findAll());
-    return this.productsCategoryService.findAll();
+  async findAll(@Query() query: string): Promise<IProductsCategory[]> {
+    return this.productsCategoryService.findAll(query);
   }
 
   @Get(':id')
